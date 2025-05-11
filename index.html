@@ -1,0 +1,209 @@
+<html>
+<head>
+    <title>OMNIPRESENCE</title>
+    <style>
+        body { margin: 0; overflow: hidden; }
+        canvas { width: 100%; height: 100%; }
+        #ui { position: fixed; bottom: 20px; left: 20px; color: red; font-family: monospace; font-size: 24px; }
+        #crosshair { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); color: red; font-size: 24px; }
+        .weapon-ui { position: fixed; bottom: 20px; right: 20px; color: white; font-family: monospace; }
+        #health-bar-container {
+            position: fixed;
+            bottom: 50px;
+            left: 20px;
+            width: 200px;
+            height: 20px;
+            background: rgba(0, 0, 0, 0.5);
+            border: 2px solid #333;
+        }
+        #health-bar {
+            width: 100%;
+            height: 100%;
+            background: red;
+            transition: width 0.3s;
+        }
+        #eat-prompt {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, 50px);
+            color: white;
+            font-family: monospace;
+            font-size: 18px;
+            display: none;
+        }
+        #coin-cooldown {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            color: gold;
+            font-family: monospace;
+            font-size: 18px;
+            display: none;
+        }
+        #cooldown-indicator {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: red;
+            font-family: monospace;
+            font-size: 18px;
+            display: none;
+        }
+        #main-menu {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: #00f;
+            font-family: monospace;
+            z-index: 1000;
+        }
+        #title {
+            font-size: 72px;
+            margin-bottom: 50px;
+            color: #00f;
+            text-shadow: 0 0 10px #00f;
+        }
+        .menu-button {
+            font-size: 24px;
+            padding: 15px 30px;
+            margin: 10px;
+            background: #000;
+            border: 2px solid #00f;
+            color: #00f;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .menu-button:hover {
+            background: #00f;
+            color: #000;
+        }
+        #instructions {
+            font-size: 18px;
+            color: #888;
+            margin-top: 30px;
+            text-align: center;
+            max-width: 600px;
+        }
+        #game-ui {
+            display: none;
+        }
+        #blood-presence {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            color: darkred;
+            font-family: monospace;
+            font-size: 24px;
+            text-shadow: 0 0 5px red;
+        }
+        #dark-matter-cooldown {
+            position: fixed;
+            top: 50px;
+            right: 20px;
+            color: purple;
+            font-family: monospace;
+            font-size: 18px;
+            display: none;
+        }
+        #mute-button {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            width: 40px;
+            height: 40px;
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid #444;
+            border-radius: 5px;
+            color: white;
+            font-size: 24px;
+            line-height: 40px;
+            text-align: center;
+            cursor: pointer;
+            z-index: 1001;
+            transition: all 0.3s;
+        }
+        #mute-button:hover {
+            background: rgba(0, 0, 255, 0.3);
+            border-color: #00f;
+        }
+        #omni-hint {
+            position: fixed;
+            top: 70px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: gold;
+            font-family: monospace;
+            font-size: 24px;
+            text-shadow: 0 0 10px gold;
+            display: none;
+            z-index: 1001;
+        }
+    </style>
+</head>
+<body>
+    <audio id="background-music1">
+        <source src="Phonk Ahh Beat.wav" type="audio/wav">
+    </audio>
+    <audio id="background-music2">
+        <source src="OMNISCIENCE.wav" type="audio/wav">
+    </audio>
+    <audio id="background-music3">
+        <source src="OMNIBUS.wav" type="audio/wav">
+    </audio>
+    <div id="mute-button">🔊</div>
+    <div id="main-menu">
+        <div id="title">OMNIPRESENCE</div>
+        <button class="menu-button" id="start-game">START GAME</button>
+        <button class="menu-button" id="show-instructions">INSTRUCTIONS</button>
+        <div id="instructions" style="display: none;">
+            <h3>CONTROLS:</h3>
+            WASD/Arrow Keys - Move around the arena<br>
+            Mouse - Look around and aim your weapons<br>
+            Left Click - Primary fire (shoot with most weapons, hold for Can Opener scope)<br>
+            Right Click - Special ability (ricochet with Pistol, coin flip with MoneyMaker, trigger Omnipresence)<br>
+            E - Consume nearby corpses to restore 25 health<br>
+            Space - Jump to reach platforms<br>
+            1-6 - Select weapons (when unlocked)<br>
+            T - Equip Omnipresence (final weapon)<br>
+            7 - Equip Can Opener<br>
+            8 - Equip Necronomicon<br>
+            9 - Equip Dark Matter Gauntlet<br>
+        </div>
+    </div>
+    <div id="game-ui">
+        <div id="ui">HP: <span id="health">100</span></div>
+        <div id="health-bar-container">
+            <div id="health-bar"></div>
+        </div>
+        <div id="crosshair">+</div>
+        <div id="eat-prompt">Press E to consume corpse</div>
+        <div class="weapon-ui">
+            <div id="current-weapon">PISTOL</div>
+        </div>
+        <div id="coin-cooldown">Coin Ready!</div>
+        <div id="cooldown-indicator">Slash Cooldown: 10s</div>
+        <div id="blood-presence">Blood Presence: 0</div>
+        <div id="dark-matter-cooldown">Dark Matter Ready!</div>
+        <div id="omni-hint">Press T ;)</div>
+    </div>
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.159.0/build/three.module.js",
+                "three/addons/": "https://unpkg.com/three@0.159.0/examples/jsm/"
+            }
+        }
+    </script>
+    <script type="module" src="gameState.js"></script>
+    <script type="module" src="game.js"></script>
+</body>
+</html>
